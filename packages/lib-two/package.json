@@ -1,0 +1,28 @@
+{
+    "name": "@systemcraft/lib-two",
+    "version": "0.1.6",
+    "main": "dist/index.js",
+    "module": "dist/index.mjs",
+    "types": "dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.mjs",
+            "require": "./dist/index.js"
+        }
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsup src/index.ts --format cjs,esm --dts --tsconfig tsconfig.json",
+        "lint": "tsc -p tsconfig.json",
+        "test": "echo \"\u001b[33mWarning: no test specified\u001b[0m\""
+    },
+    "dependencies": {
+        "@systemcraft/lib-one": "workspace:^"
+    }
+}
