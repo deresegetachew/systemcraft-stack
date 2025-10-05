@@ -1,4 +1,4 @@
-# @systemcraft/lib-one
+# @systemcraft-stack/lib-one
 
 ## 0.1.7
 

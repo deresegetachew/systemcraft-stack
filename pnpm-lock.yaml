@@ -22,7 +22,7 @@ importers:
 
   packages/lib-two:
     dependencies:
-      '@systemcraft/lib-one':
+      '@systemcraft-stack/lib-one':
         specifier: workspace:^
         version: link:../lib-one
 

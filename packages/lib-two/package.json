@@ -23,6 +23,6 @@
         "test": "echo \"\u001b[33mWarning: no test specified\u001b[0m\""
     },
     "dependencies": {
-        "@systemcraft/lib-one": "workspace:^"
+        "@systemcraft-stack/lib-one": "workspace:^"
     }
 }
