@@ -1,5 +1,11 @@
 # @systemcraft/lib-one
 
+## 0.1.7
+
+### Patch Changes
+
+- f975c1d: testing ci setups
+
 ## 0.1.6
 
 ### Patch Changes
