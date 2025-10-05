@@ -1,5 +1,13 @@
 # @systemcraft/lib-two
 
+## 0.1.7
+
+### Patch Changes
+
+- f975c1d: testing ci setups
+- Updated dependencies [f975c1d]
+  - @systemcraft/lib-one@0.1.7
+
 ## 0.1.6
 
 ### Patch Changes
