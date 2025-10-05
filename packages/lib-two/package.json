@@ -1,5 +1,5 @@
 {
-    "name": "@systemcraft/lib-two",
+    "name": "@systemcraft-stack/lib-two",
     "version": "0.1.6",
     "main": "dist/index.js",
     "module": "dist/index.mjs",
