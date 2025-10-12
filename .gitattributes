@@ -1,0 +1,4 @@
+packages/**   merge=ours
+.changeset/** merge=ours
+LICENSE       merge=ours
+LICENSES/**   merge=ours
