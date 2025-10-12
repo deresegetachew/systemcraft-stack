@@ -1,4 +1,10 @@
-# @systemcraft/lib-one
+# @systemcraft-stack/lib-one
+
+## 0.1.8
+
+### Patch Changes
+
+- 493ad00: test
 
 ## 0.1.7
 

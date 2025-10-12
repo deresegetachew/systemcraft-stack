@@ -1,6 +1,6 @@
 {
-    "name": "@systemcraft/lib-two",
-    "version": "0.1.7",
+    "name": "@systemcraft-stack/lib-two",
+    "version": "0.1.8",
     "main": "dist/index.js",
     "module": "dist/index.mjs",
     "types": "dist/index.d.ts",
@@ -23,6 +23,6 @@
         "test": "echo \"\u001b[33mWarning: no test specified\u001b[0m\""
     },
     "dependencies": {
-        "@systemcraft/lib-one": "workspace:^"
+        "@systemcraft-stack/lib-one": "workspace:^"
     }
 }

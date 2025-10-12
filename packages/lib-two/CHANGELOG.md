@@ -1,5 +1,13 @@
 # @systemcraft/lib-two
 
+## 0.1.8
+
+### Patch Changes
+
+- 493ad00: test
+- Updated dependencies [493ad00]
+  - @systemcraft-stack/lib-one@0.1.8
+
 ## 0.1.7
 
 ### Patch Changes
