@@ -28,7 +28,7 @@ jobs:
       matrix:
         node-version: [22]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false # so we control the push identity
       - uses: ./.github/actions/setup-node-pnpm
@@ -67,7 +67,7 @@ jobs:
       matrix:
         node-version: [22]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false # so we control the push identity
       
