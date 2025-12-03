@@ -1,8 +1,8 @@
 {
 	"private": true,
 	"devDependencies": {
-		"@changesets/cli": "^2.29.7",
-		"tsup": "^8.5.0",
+		"@changesets/cli": "^2.29.8",
+		"tsup": "^8.5.1",
 		"typescript": "^5.9.3"
 	},
 	"scripts": {
