@@ -1,5 +1,11 @@
 name: Build, Lint, and Test
 description: A composite action to build, lint, and test the project
+
+inputs:
+  github-token:
+    description: "GitHub token for PR comments and artifact access"
+    required: true
+
 runs:
   using: composite
   steps:
@@ -21,4 +27,16 @@ runs:
 
     - name: Run tests
       shell: bash
-      run: pnpm -r test
+      run: pnpm -r test -- --ci --coverage
+
+    # Use our coverage reporter action for comprehensive coverage analysis
+    - name: Generate coverage report
+      uses: deresegetachew/systemcraft-stack-actions/actions/coverage-reporter@main
+      with:
+        coverage-command: 'pnpm -r test'
+        coverage-file: 'coverage-summary.json'
+        output-dir: 'coverage-artifacts'
+        enable-pr-comments: 'true'
+        minimum-coverage: '70'
+        github-token: ${{ inputs.github-token }}
+      

@@ -2,11 +2,15 @@
 	"private": true,
 	"devDependencies": {
 		"@changesets/cli": "^2.29.7",
+		"@types/node": "^24.8.1",
+		"c8": "^10.1.3",
 		"tsup": "^8.5.0",
+		"tsx": "^4.20.6",
 		"typescript": "^5.9.3"
 	},
 	"scripts": {
-		"release": "changeset publish"
+		"test-gh-scripts": "c8 --reporter=text --reporter=html node --test --import './.github/scripts/test/setup.js' './.github/scripts/**/*.test.js'",
+		"test-gh-scripts:debug": "node --test  --inspect --import './.github/scripts/test/setup.js' './.github/scripts/**/*.test.js'"
 	},
 	"packageManager": "pnpm@10.17.1+sha256.a1e0133f6801c13039ae41309e5e5a7d1058a3a1e1edd020a4944a83c5368d04"
 }
