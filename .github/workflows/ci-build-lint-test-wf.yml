@@ -1,29 +1,21 @@
-name: main
+name: ci-build-lint-test-wf
 on:
-  workflow_run:
-    workflows: ["Prepare"]
-    types: [completed]
   push:
-    branches: [ main ]
+    branches: [main, "release/*", "changeset-release/*"]
   pull_request:
     types: [opened, reopened, synchronize, labeled, unlabeled]
-    branches: [ main ]
+    branches: [main, "release/*", "changeset-release/*"]
 
 jobs:
-  # Check if we should run (centralized condition)
-  check-should-run:
-    runs-on: ubuntu-latest
-    outputs:
-      should-run: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
-    steps:
-      - name: Check condition
-        run: echo "Should run jobs:${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}"
-
   build:
     name: build
-    needs: check-should-run
-    if: ${{ needs.check-should-run.outputs.should-run == 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      # This permissions are required by testcoverage report
+      issues: write
+      pull-requests: write
+      contents: read
+      actions: read # Required to download artifacts
     strategy:
       matrix:
         node-version: [22]
@@ -31,37 +23,40 @@ jobs:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false # so we control the push identity
+          fetch-depth: 2
       - uses: ./.github/actions/setup-node-pnpm
         with:
           node-version: ${{ matrix.node-version }}
 
-      - uses: ./.github/actions/require-changeset
+      - name: Require changeset in PR
+        uses: deresegetachew/systemcraft-stack-actions/actions/changeset-validator@main
         with:
           skip-label: "[skip changeset check]"
 
       - uses: ./.github/actions/build-lint-test
+        with:
+          github-token: ${{ github.token }}
 
   codeql:
-    needs: check-should-run
-    if: ${{ needs.check-should-run.outputs.should-run == 'true' }}
-    uses: ./.github/workflows/codeql.yml
+    uses: ./.github/workflows/codeql-analyze-wf.yml
     permissions:
       # This permissions are required by codeql workflow
       security-events: write
       pull-requests: write
       contents: read
-    with: 
-      languages: 'javascript' # comma separated values code
-
+    with:
+      languages: "javascript" # comma separated values code
+  # we are keeping publish here bc uploading artifacts across wf can be buggy.
   publish:
-    needs: [check-should-run, build]
+    needs: [build]
     name: publish
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.check-should-run.outputs.should-run == 'true' }}
+    if: >
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      # Grants write access to the GitHub Actions workflow's OIDC token, enabling authentication with external services.
-      id-token: write 
+      id-token: write
       pull-requests: write
     strategy:
       matrix:
@@ -69,23 +64,20 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          persist-credentials: false # so we control the push identity
-      
-      # Setup Node.js with pnpm
+          persist-credentials: false
+          fetch-depth: 2
       - uses: ./.github/actions/setup-node-pnpm
         with:
           node-version: ${{ matrix.node-version }}
 
-       # Configure git identity and GPG signing for release commits
       - uses: ./.github/actions/setup-ci-git-identity
         with:
-          purpose: 'GPG-signed release commits'
+          purpose: "GPG-signed release commits"
           git-user-name: ${{ vars.CI_GPG_USER_NAME }}
           git-user-email: ${{ vars.CI_GPG_USER_EMAIL }}
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: ${{ secrets.GPG_PASSPHRASE }}
 
-      # Set up authentication to push changes using the bot / pat token
       - name: Set up auth with bot token
         run: |
           git remote set-url origin https://x-access-token:${{ secrets.BOT_TOKEN }}@github.com/${{ github.repository }}.git
@@ -98,14 +90,14 @@ jobs:
           git config --get user.email
           echo "Env identity:"
           env | grep -E 'GIT_(AUTHOR|COMMITTER)_' || true
-      # Download build artifacts to the 'packages' directory
+
       - name: Download build artifacts
         uses: actions/download-artifact@v5
         with:
           name: dist-packages
           path: packages
-      
-     # Add a debugging step to list the contents of the packages directory
+
+      # Add a debugging step to list the contents of the packages directory
       - name: Debug downloaded artifacts
         run: |
           echo "Contents after artifact download:"
@@ -113,15 +105,28 @@ jobs:
           echo "Package directories:"
           ls -la packages/*/dist/ 2>/dev/null || echo "No dist directories found"
 
-      # Create Release Pull Request or Publish
-      - name: Create Release Pull Request or Publish
+      - name: Run version step
+        uses: deresegetachew/systemcraft-stack-actions/actions/plan-maintenance-branches@main
+        env:
+          ENABLE_MULTI_RELEASE: ${{ vars.ENABLE_MULTI_RELEASE }}
+
+      - name: Create Release Pull Request
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: 'pnpm run release'
+          commit: "chore: update package versions and changelogs"
+          version: .github/scripts/custom-version-command.sh
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          # should i rename this to release and publish.
+      - name: Run release step
+        uses: deresegetachew/systemcraft-stack-actions/actions/release-with-branching@main
+        with:
+          enable-multi-release: ${{ vars.ENABLE_MULTI_RELEASE }}
+          node-auth-token: ${{ secrets.NPM_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       # Debugging step to show the latest commit with signature info
       - name: Show latest commit + signature
